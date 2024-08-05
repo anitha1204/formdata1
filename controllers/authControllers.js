@@ -187,6 +187,33 @@ const login = async (req, res) => {
     }
 };
 
+// const forgotPassword = async (req, res) => {
+//     const { email } = req.body;
+
+//     try {
+//         const user = await UserDatas.findOne({ email });
+
+//         if (!user) {
+//             return res.status(400).json({ msg: 'User with this email does not exist' });
+//         }
+
+//         const token = crypto.randomBytes(20).toString('hex');
+//         const expiry = Date.now() + 3600000; // 1 hour
+
+//         user.resetToken = token;
+//         user.resetTokenExpiry = expiry;
+//         await user.save();
+
+//         await sendResetEmail(user.email, token);
+
+//         res.status(200).json({ msg: 'Password reset email sent' });
+//     } catch (error) {
+//         console.error('Error during password reset:', error);
+//         res.status(500).send('Server error');
+//     }
+// };
+
+
 const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
@@ -197,7 +224,7 @@ const forgotPassword = async (req, res) => {
             return res.status(400).json({ msg: 'User with this email does not exist' });
         }
 
-        const token = crypto.randomBytes(20).toString('hex');
+        const token = generateToken(6, 8); // Generate a token with a length between 6 and 8 characters
         const expiry = Date.now() + 3600000; // 1 hour
 
         user.resetToken = token;
@@ -213,10 +240,41 @@ const forgotPassword = async (req, res) => {
     }
 };
 
+// const resetPassword = async (req, res) => {
+//     const { token, newPassword } = req.body;
+
+//     try {
+//         const user = await UserDatas.findOne({
+//             resetToken: token,
+//             resetTokenExpiry: { $gt: Date.now() },
+//         });
+
+//         if (!user) {
+//             return res.status(400).json({ msg: 'Invalid or expired token' });
+//         }
+
+//         const salt = await bcrypt.genSalt(10);
+//         user.password = await bcrypt.hash(newPassword, salt);
+//         user.resetToken = undefined;
+//         user.resetTokenExpiry = undefined;
+//         await user.save();
+
+//         res.status(200).json({ msg: 'Password reset successful' });
+//     } catch (error) {
+//         console.error('Error during password reset:', error);
+//         res.status(500).send('Server error');
+//     }
+// };
+
+
 const resetPassword = async (req, res) => {
-    const { token, newPassword } = req.body;
+    const { token, newPassword } = cleanInput(req.body);
 
     try {
+        if (!token || token.length < 6 || token.length > 8) {
+            return res.status(400).json({ msg: 'Invalid token length' });
+        }
+
         const user = await UserDatas.findOne({
             resetToken: token,
             resetTokenExpiry: { $gt: Date.now() },
