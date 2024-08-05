@@ -1,5 +1,4 @@
 // const nodemailer = require('nodemailer');
-// const crypto = require('crypto');
 // const bcrypt = require('bcryptjs');
 // const jwt = require('jsonwebtoken');
 // const dotenv = require('dotenv');
@@ -187,32 +186,28 @@
 //     }
 // };
 
-// // const forgotPassword = async (req, res) => {
-// //     const { email } = req.body;
+// // Function to generate a 6-character token with at least one number
+// const generateToken = (length) => {
+//     const chars = '0123456789';
+//     let token = '';
+//     let hasNumber = false;
 
-// //     try {
-// //         const user = await UserDatas.findOne({ email });
+//     while (token.length < length) {
+//         const char = chars[Math.floor(Math.random() * chars.length)];
+//         token += char;
 
-// //         if (!user) {
-// //             return res.status(400).json({ msg: 'User with this email does not exist' });
-// //         }
+//         if (/\d/.test(char)) {
+//             hasNumber = true;
+//         }
+//     }
 
-// //         const token = crypto.randomBytes(20).toString('hex');
-// //         const expiry = Date.now() + 3600000; // 1 hour
+//     if (!hasNumber) {
+//         const randomIndex = Math.floor(Math.random() * length);
+//         token = token.slice(0, randomIndex) + '1' + token.slice(randomIndex + 1);
+//     }
 
-// //         user.resetToken = token;
-// //         user.resetTokenExpiry = expiry;
-// //         await user.save();
-
-// //         await sendResetEmail(user.email, token);
-
-// //         res.status(200).json({ msg: 'Password reset email sent' });
-// //     } catch (error) {
-// //         console.error('Error during password reset:', error);
-// //         res.status(500).send('Server error');
-// //     }
-// // };
-
+//     return token;
+// };
 
 // const forgotPassword = async (req, res) => {
 //     const { email } = req.body;
@@ -224,7 +219,7 @@
 //             return res.status(400).json({ msg: 'User with this email does not exist' });
 //         }
 
-//         const token = generateToken(6, 8); // Generate a token with a length between 6 and 8 characters
+//         const token = generateToken(6); // Generate a token with exactly 6 characters
 //         const expiry = Date.now() + 3600000; // 1 hour
 
 //         user.resetToken = token;
@@ -235,43 +230,16 @@
 
 //         res.status(200).json({ msg: 'Password reset email sent' });
 //     } catch (error) {
-//         console.error('Error during password reset:', error);
+//         console.error('Error during password reset:', error.stack);
 //         res.status(500).send('Server error');
 //     }
 // };
-
-// // const resetPassword = async (req, res) => {
-// //     const { token, newPassword } = req.body;
-
-// //     try {
-// //         const user = await UserDatas.findOne({
-// //             resetToken: token,
-// //             resetTokenExpiry: { $gt: Date.now() },
-// //         });
-
-// //         if (!user) {
-// //             return res.status(400).json({ msg: 'Invalid or expired token' });
-// //         }
-
-// //         const salt = await bcrypt.genSalt(10);
-// //         user.password = await bcrypt.hash(newPassword, salt);
-// //         user.resetToken = undefined;
-// //         user.resetTokenExpiry = undefined;
-// //         await user.save();
-
-// //         res.status(200).json({ msg: 'Password reset successful' });
-// //     } catch (error) {
-// //         console.error('Error during password reset:', error);
-// //         res.status(500).send('Server error');
-// //     }
-// // };
-
 
 // const resetPassword = async (req, res) => {
 //     const { token, newPassword } = cleanInput(req.body);
 
 //     try {
-//         if (!token || token.length < 6 || token.length > 8) {
+//         if (!token || token.length !== 6) {
 //             return res.status(400).json({ msg: 'Invalid token length' });
 //         }
 
@@ -292,7 +260,7 @@
 
 //         res.status(200).json({ msg: 'Password reset successful' });
 //     } catch (error) {
-//         console.error('Error during password reset:', error);
+//         console.error('Error during password reset:', error.stack);
 //         res.status(500).send('Server error');
 //     }
 // };
@@ -305,10 +273,7 @@
 // };
 
 
-
-
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
@@ -394,19 +359,22 @@ const register = async (req, res) => {
             return res.status(400).json({ msg: 'Password must be at least 8 characters long, and include at least one uppercase letter, one lowercase letter, one number, and one special character' });
         }
 
+        // Convert username to uppercase
+        const uppercaseUsername = username.toUpperCase();
+
         // Log input validation
-        debugLog('Username', username);
+        debugLog('Username', uppercaseUsername);
         debugLog('Email', email);
         debugLog('Password', password);
 
-        let user = await UserDatas.findOne({ $or: [{ username }, { email }] });
+        let user = await UserDatas.findOne({ $or: [{ username: uppercaseUsername }, { email }] });
 
         if (user) {
             return res.status(400).json({ msg: 'User already exists' });
         }
 
         user = new UserDatas({ 
-            username,
+            username: uppercaseUsername,
             email,
             password,
         });
@@ -445,12 +413,15 @@ const login = async (req, res) => {
             return res.status(400).json({ msg: 'Username/Email and password are required' });
         }
 
+        // Convert usernameOrEmail to uppercase
+        const uppercaseUsernameOrEmail = usernameOrEmail.toUpperCase();
+
         // Log input validation
-        debugLog('Username/Email', usernameOrEmail);
+        debugLog('Username/Email', uppercaseUsernameOrEmail);
         debugLog('Password', password);
 
         const user = await UserDatas.findOne({
-            $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }]
+            $or: [{ username: uppercaseUsernameOrEmail }, { email: usernameOrEmail }]
         });
 
         if (!user) {
@@ -496,10 +467,27 @@ const login = async (req, res) => {
     }
 };
 
-// Function to generate a token of specified length
-const generateToken = (minLength, maxLength) => {
-    const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
-    return crypto.randomBytes(length).toString('hex').slice(0, length);
+// Function to generate a 6-character token with at least one number
+const generateToken = (length) => {
+    const chars = '0123456789';
+    let token = '';
+    let hasNumber = false;
+
+    while (token.length < length) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        token += char;
+
+        if (/\d/.test(char)) {
+            hasNumber = true;
+        }
+    }
+
+    if (!hasNumber) {
+        const randomIndex = Math.floor(Math.random() * length);
+        token = token.slice(0, randomIndex) + '1' + token.slice(randomIndex + 1);
+    }
+
+    return token;
 };
 
 const forgotPassword = async (req, res) => {
@@ -512,7 +500,7 @@ const forgotPassword = async (req, res) => {
             return res.status(400).json({ msg: 'User with this email does not exist' });
         }
 
-        const token = generateToken(6, 8); // Generate a token with a length between 6 and 8 characters
+        const token = generateToken(6); // Generate a token with exactly 6 characters
         const expiry = Date.now() + 3600000; // 1 hour
 
         user.resetToken = token;
@@ -532,7 +520,7 @@ const resetPassword = async (req, res) => {
     const { token, newPassword } = cleanInput(req.body);
 
     try {
-        if (!token || token.length < 6 || token.length > 8) {
+        if (!token || token.length !== 6) {
             return res.status(400).json({ msg: 'Invalid token length' });
         }
 
