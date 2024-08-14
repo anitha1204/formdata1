@@ -1,24 +1,26 @@
 const mongoose = require('mongoose');
 
-const CompanySchema = new mongoose.Schema({
-  companyName: { type: String, required: true },
-  address: { type: String, required: false }, // Optional field
-  registeredOfficeAddress: { type: String, required: false }, // Optional field
-  chiefExecutiveName: { type: String, required: true },
-  designation: { type: String, required: true },
-  telephone: { type: String, required: true },
-  email: { type: String, required: true },
-  mobileNumber: { type: String, required: false }, // Optional field
-  website: { type: String, required: false }, // Optional field
-  yearOfEstablishment: { type: Number, required: true },
-  numberOfEmployees: { type: Number, required: true },
-  annualTurnover: { type: String, required: false }, // Optional field
-  gstNo: { type: String, required: false }, // Optional field
-  natureOfCompany: { type: String, required: true },
-  businessActivity: { type: String, required: true },
-  paidUpCapital: { type: String, required: true },
-  keyContactPerson: { type: String, required: true },
-  secondaryContactPerson: { type: String, required: false }, // Optional field
+const companySchema = new mongoose.Schema({
+    companyName: { type: String, required: true },
+    address: { type: String },
+    registeredOfficeAddress: { type: String },
+    chiefExecutiveName: { type: String, required: true },
+    designation: { type: String, required: true },
+    yearOfEstablishment: { type: String, required: true },
+    telephone: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    mobile: { type: String },
+    website: { type: String },
+    businessActivity: { type: String },
+    paidUpCapital: { type: String },
+    numberOfEmployees: { type: String },
+    annualTurnover: { type: String },
+    gstNo: { type: String },
+    natureOfCompany: { type: String },
+    keyContactPerson: { type: String },
+    keyContactMobile: { type: String },
+    secondaryContactPerson: { type: String },
+    secondaryContactMobile: { type: String }
 });
 
-module.exports = mongoose.model('Company', CompanySchema);
+module.exports = mongoose.model('Company', companySchema);
