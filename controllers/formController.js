@@ -81,6 +81,17 @@ exports.getAllCompanies = async (req, res) => {
     }
 };
 
+// Search companies by name
+exports.searchCompanies = async (req, res) => {
+    try {
+        const { name } = req.query;
+        const companies = await Company.find({ companyName: new RegExp(name, 'i') });
+        res.status(200).json(companies);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Get a company by ID
 exports.getCompanyById = async (req, res) => {
     try {

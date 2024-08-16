@@ -1,6 +1,10 @@
+
+
 // const express = require('express');
 // const connectDB = require('./config/db');
 // const authRoutes = require('./routes/authRoutes');
+// const formRoutes = require('./routes/formRoutes');
+// const errorHandler = require('./middleware/errorHandler');
 // const dotenv = require('dotenv');
 // const cors = require('cors');
 
@@ -18,6 +22,11 @@
 
 // // Define Routes
 // app.use('/api/auth', authRoutes);
+
+// app.use('/api/form', formRoutes);
+
+
+// app.use(errorHandler);
 
 // const PORT =  5000;
 // app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
@@ -39,17 +48,14 @@ connectDB();
 // Init Middleware
 app.use(express.json({ extended: false }));
 
-//cors connect
+// CORS setup
 app.use(cors());
 
 // Define Routes
 app.use('/api/auth', authRoutes);
-
 app.use('/api/form', formRoutes);
-
 
 app.use(errorHandler);
 
-const PORT =  5000;
+const PORT = 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
