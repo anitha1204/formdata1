@@ -58,7 +58,7 @@
 // };
 
 
-const Company = require('../models/Company');
+const Company = require('../models/Companyform');
 
 // Create a new company
 exports.createCompany = async (req, res) => {
