@@ -55,9 +55,7 @@ app.use(cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/form', formRoutes);
 
-app.use('/api/categories', require('./routes/categoryRoutes'));
-app.use('/api/companies', require('./routes/companyRoutes'));
-app.use('/api/emails', require('./routes/emailRoutes'));
+
 
 app.use(errorHandler);
 

@@ -1,61 +1,4 @@
-// const Company = require('../models/Company');
 
-// exports.createCompany = async (req, res) => {
-//   try {
-//     const newCompany = new Company(req.body);
-//     await newCompany.save();
-//     res.status(201).json(newCompany);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// exports.getAllCompanies = async (req, res) => {
-//   try {
-//     const companies = await Company.find();
-//     res.status(200).json(companies);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// exports.getCompanyById = async (req, res) => {
-//   try {
-//     const company = await Company.findById(req.params.id);
-//     if (!company) {
-//       return res.status(404).json({ error: 'Company not found' });
-//     }
-//     res.status(200).json(company);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// exports.updateCompany = async (req, res) => {
-//   try {
-//     const updatedCompany = await Company.findByIdAndUpdate(req.params.id, req.body, {
-//       new: true,
-//     });
-//     if (!updatedCompany) {
-//       return res.status(404).json({ error: 'Company not found' });
-//     }
-//     res.status(200).json(updatedCompany);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-// exports.deleteCompany = async (req, res) => {
-//   try {
-//     const company = await Company.findByIdAndDelete(req.params.id);
-//     if (!company) {
-//       return res.status(404).json({ error: 'Company not found' });
-//     }
-//     res.status(200).json({ message: 'Company deleted successfully' });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
 
 
 const Company = require('../models/Companyform');
@@ -81,6 +24,7 @@ exports.getAllCompanies = async (req, res) => {
     }
 };
 
+
 // Search companies by name
 exports.searchCompanies = async (req, res) => {
     try {
@@ -98,6 +42,18 @@ exports.getCompanyById = async (req, res) => {
         const company = await Company.findById(req.params.id);
         if (!company) return res.status(404).json({ message: 'Company not found' });
         res.status(200).json(company);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+// Get company categories by company ID
+exports.getCompanyCategories = async (req, res) => {
+    try {
+        const company = await Company.findById(req.params.id);
+        if (!company) return res.status(404).json({ message: 'Company not found' });
+
+        // Assuming `natureOfCompany` is an array of categories
+        res.status(200).json({ categories: company.natureOfCompany });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
