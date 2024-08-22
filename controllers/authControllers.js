@@ -44,7 +44,10 @@ const validateUsername = (username) => {
     const hasUppercase = /[A-Z]/;
     const hasLowercase = /[a-z]/;
     
-    return letterOnly.test(username) && hasUppercase.test(username) && hasLowercase.test(username);
+    return letterOnly.test(username) && 
+           hasUppercase.test(username) && 
+           hasLowercase.test(username) &&
+           username.length >= 2;
 };
 
 const validateEmail = (email) => {
