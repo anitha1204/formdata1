@@ -226,7 +226,7 @@ const companySchema = new mongoose.Schema({
     required: [true, 'Business activity is required'] 
   },
   paidUpCapital: { 
-    type: Number, 
+    type: String, 
     required: [true, 'Paid up capital is required'], 
     
   },
@@ -236,7 +236,7 @@ const companySchema = new mongoose.Schema({
     min: [1, 'Number of employees must be at least 1']
   },
   annualTurnover: { 
-    type: Number, 
+    type: String, 
     required: [true, 'Annual turnover is required'], 
     
   },
