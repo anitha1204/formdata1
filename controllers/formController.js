@@ -197,34 +197,38 @@ exports.getCompanyById = async (req, res) => {
     }
 };
 
-
 // Update a company
 exports.updateCompany = async (req, res) => {
     try {
-        const { id } = req.params;
-        if (!id) {
-            return res.status(400).json({ error: 'Company ID is required.' });
-        }
+        const updateData = req.body;
 
-        // Ensure the data conforms to the expected types and structure
-        const updatedCompany = await Company.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+        // Remove undefined or null fields if necessary
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === undefined || updateData[key] === null) {
+                delete updateData[key];
+            }
+        });
+
+        const updatedCompany = await Company.findByIdAndUpdate(req.params.id, updateData, { 
+            new: true, 
+            runValidators: true 
+        });
 
         if (!updatedCompany) {
-            return res.status(404).json({ error: 'Company not found.' });
+            return res.status(404).json({ message: 'Company not found' });
         }
 
         res.status(200).json(updatedCompany);
     } catch (error) {
         console.error('Error updating company:', error);
-
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(err => err.message);
             return res.status(400).json({ errors: messages });
         }
-
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
+
 
 // Delete a company
 exports.deleteCompany = async (req, res) => {
