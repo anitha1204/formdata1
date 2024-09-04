@@ -179,51 +179,38 @@ const generatePassword = () => {
 // Create a new company
 exports.createCompany = async (req, res) => {
     try {
-        // Validate request body (if necessary)
-        // For example, checking if required fields are present
-        if (!req.body.companyName || !req.body.email || !req.body.keyContactPerson) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        // Save company information
         const company = new Company(req.body);
         const savedCompany = await company.save();
 
-        // Create a new user for the company
         const password = generatePassword();
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         const newUser = new User({
             username: savedCompany.keyContactPerson,
             email: savedCompany.email,
-            password: hashedPassword, // Storing the hashed password
-            companyId: savedCompany._id,
+            password: password,
+            companyId: savedCompany._id
         });
 
         await newUser.save();
 
-        // Send email with the account details
         const mailOptions = {
             from: process.env.EMAIL,
             to: savedCompany.email,
             subject: 'Your New Account',
-            text: `Your account has been created. Your password is: ${password}`,
+            text: `Your account has been created. Your password is: ${password}`
         };
 
         await transporter.sendMail(mailOptions);
 
         res.status(201).json({
             company: savedCompany,
-            message: 'Company created and user account email sent successfully',
+            message: 'Company created and user account email sent successfully'
         });
     } catch (error) {
-        console.error('Error in createCompany:', error);
-
+        console.error('Error creating company:', error);
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(err => err.message);
             return res.status(400).json({ errors: messages });
         }
-
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
