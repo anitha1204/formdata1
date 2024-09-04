@@ -35,7 +35,9 @@ const express = require('express');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const formRoutes = require('./routes/formRoutes');
+const creactRouter = require('./routes/creactRouter');
 const errorHandler = require('./middleware/errorHandler');
+const handleError = require('./middleware/handleError');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
@@ -54,10 +56,11 @@ app.use(cors());
 // Define Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/form', formRoutes);
+app.use('/api/creact', creactRouter); // Update this to use /api/creact
 
-
-
+// Error handling middleware
 app.use(errorHandler);
+app.use(handleError);
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
