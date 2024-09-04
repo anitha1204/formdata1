@@ -153,8 +153,9 @@
 
 
 const Company = require('../models/Companyform');
-const User = require('../models/User'); // Assuming you have a User model
+const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
 
 // Nodemailer transporter setup
 const transporter = nodemailer.createTransport({
@@ -178,39 +179,51 @@ const generatePassword = () => {
 // Create a new company
 exports.createCompany = async (req, res) => {
     try {
+        // Validate request body (if necessary)
+        // For example, checking if required fields are present
+        if (!req.body.companyName || !req.body.email || !req.body.keyContactPerson) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Save company information
         const company = new Company(req.body);
         const savedCompany = await company.save();
 
         // Create a new user for the company
         const password = generatePassword();
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const newUser = new User({
             username: savedCompany.keyContactPerson,
             email: savedCompany.email,
-            password: password, // In a real application, make sure to hash this password
-            companyId: savedCompany._id
+            password: hashedPassword, // Storing the hashed password
+            companyId: savedCompany._id,
         });
 
         await newUser.save();
 
-        // Send email
+        // Send email with the account details
         const mailOptions = {
             from: process.env.EMAIL,
             to: savedCompany.email,
             subject: 'Your New Account',
-            text: `Your account has been created. Your password is: ${password}`
+            text: `Your account has been created. Your password is: ${password}`,
         };
 
         await transporter.sendMail(mailOptions);
 
         res.status(201).json({
             company: savedCompany,
-            message: 'Company created and user account email sent successfully'
+            message: 'Company created and user account email sent successfully',
         });
     } catch (error) {
+        console.error('Error in createCompany:', error);
+
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(err => err.message);
             return res.status(400).json({ errors: messages });
         }
+
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
@@ -221,6 +234,7 @@ exports.getAllCompanies = async (req, res) => {
         const companies = await Company.find();
         res.status(200).json(companies);
     } catch (error) {
+        console.error('Error in getAllCompanies:', error);
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
@@ -232,6 +246,7 @@ exports.searchCompanies = async (req, res) => {
         const companies = await Company.find({ companyName: new RegExp(name, 'i') });
         res.status(200).json(companies);
     } catch (error) {
+        console.error('Error in searchCompanies:', error);
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
@@ -243,6 +258,7 @@ exports.getCompanyById = async (req, res) => {
         if (!company) return res.status(404).json({ message: 'Company not found' });
         res.status(200).json(company);
     } catch (error) {
+        console.error('Error in getCompanyById:', error);
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
@@ -254,10 +270,13 @@ exports.updateCompany = async (req, res) => {
         if (!updatedCompany) return res.status(404).json({ message: 'Company not found' });
         res.status(200).json(updatedCompany);
     } catch (error) {
+        console.error('Error in updateCompany:', error);
+
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(err => err.message);
             return res.status(400).json({ errors: messages });
         }
+
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
@@ -269,8 +288,7 @@ exports.deleteCompany = async (req, res) => {
         if (!result) return res.status(404).json({ message: 'Company not found' });
         res.status(200).json({ message: 'Company deleted successfully' });
     } catch (error) {
+        console.error('Error in deleteCompany:', error);
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
-
-
