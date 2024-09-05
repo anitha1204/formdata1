@@ -160,7 +160,7 @@ const send = async (companyName,address,email,mobile, website,keyContactPerson) 
             form:process.env.EMAIL,
             to: [email, ""],
             subject: "Booking the room",
-            text: `Dear ${userName}`,
+            text: `Dear ${keyContactPerson}`,
         };
         await transporter.sendMail(mailoption);
         console.log("Mail sent successfully");
