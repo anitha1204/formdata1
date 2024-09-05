@@ -170,8 +170,8 @@
 // };
 
 
-const Company = require('../models/Companyform');
 
+const Company = require('../models/Companyform');
 const nodemailer = require('nodemailer');
 
 // Generate a random password
