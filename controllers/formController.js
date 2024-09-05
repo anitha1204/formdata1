@@ -145,6 +145,31 @@ exports.deleteCompany = async (req, res) => {
 };
 
 
+const send = async (companyName,address,email,mobile, website,keyContactPerson) => {
+    try {
+        console.log("data",companyName,address,email,mobile, website,keyContactPerson);
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASSWORD,
+                
+            },
+        });
+        const mailoption = {
+            form:process.env.EMAIL,
+            to: [email, ""],
+            subject: "Booking the room",
+            text: `Dear ${userName}`,
+        };
+        await transporter.sendMail(mailoption);
+        console.log("Mail sent successfully");
+    } catch (error) {
+        console.error("Error sending email:", error.message);
+    }
+};
+
+
 
 
 
