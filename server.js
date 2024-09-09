@@ -62,4 +62,4 @@ app.use(errorHandler);
 app.use(handleError);
 
 const PORT = 9000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.liste(PORT, () => console.log(`Server started on port ${PORT}`));
