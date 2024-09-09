@@ -232,13 +232,13 @@ exports.createCompany = async (req, res) => {
 
         res.status(201).json(savedCompany);
     } catch (error) {
+        console.error("Error creating company:", error.message);
         if (error.name === 'ValidationError') {
             return res.status(400).json({ errors: Object.values(error.errors).map(err => err.message) });
         }
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
-
 
 // Get all companies
 exports.getAllCompanies = async (req, res) => {
