@@ -36,7 +36,6 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const formRoutes = require('./routes/formRoutes');
 const errorHandler = require('./middleware/errorHandler');
-const handleError = require('./middleware/handleError');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
@@ -59,7 +58,7 @@ app.use('/api/form', formRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
-app.use(handleError);
+
 
 const PORT = 9000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
