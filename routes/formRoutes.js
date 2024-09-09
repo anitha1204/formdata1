@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const formController = require('../controllers/formController');
 
+// CRUD routes for companies
 router.post('/companies', formController.createCompany);
 router.get('/companies', formController.getAllCompanies);
 router.get('/companies/search', formController.searchCompanies);

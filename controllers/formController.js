@@ -174,18 +174,14 @@
 const Company = require('../models/Companyform');
 const nodemailer = require('nodemailer');
 
-// Generate a random password
+// Generate random password
 const generatePassword = () => {
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-    let password = "";
-    for (let i = 0; i < 8; i++) {
-        password += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-    return password;
+    return Array(8).fill(0).map(() => charset.charAt(Math.floor(Math.random() * charset.length))).join('');
 };
 
-// Send email with password
-const sendPasswordEmail = async (companyName, address, email, mobile, website, keyContactPerson, password) => {
+// Send email
+const sendPasswordEmail = async (company, password) => {
     try {
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -194,27 +190,29 @@ const sendPasswordEmail = async (companyName, address, email, mobile, website, k
                 pass: process.env.EMAIL_PASSWORD,
             },
         });
+
         const mailOptions = {
             from: process.env.EMAIL,
-            to: email,
+            to: company.email,
             subject: "Your New Account Access",
-            text: `Dear ${keyContactPerson},
+            text: `Dear ${company.keyContactPerson},
 
-Your new account has been created for ${companyName}. Please use the following credentials to log in:
+Your new account has been created for ${company.companyName}. Please use the following credentials to log in:
 
-Email: ${email}
+Email: ${company.email}
 Password: ${password}
 
 Company Details:
-Address: ${address}
-Mobile: ${mobile}
-Website: ${website}
+Address: ${company.address}
+Mobile: ${company.mobile}
+Website: ${company.website}
 
 Please change your password after your first login.
 
 Best regards,
 Your Application Team`
         };
+
         await transporter.sendMail(mailOptions);
         console.log("Mail sent successfully");
     } catch (error) {
@@ -223,36 +221,25 @@ Your Application Team`
     }
 };
 
-// Create a new company
+// Create new company
 exports.createCompany = async (req, res) => {
     try {
         const password = generatePassword();
-        const company = new Company({
-            ...req.body,
-            password: password // Store the generated password
-        });
+        const company = new Company({ ...req.body, password });
+
         const savedCompany = await company.save();
-        
-        // Send email with password
-        await sendPasswordEmail(
-            savedCompany.companyName,
-            savedCompany.address,
-            savedCompany.email,
-            savedCompany.mobile,
-            savedCompany.website,
-            savedCompany.keyContactPerson,
-            password
-        );
-        
+        await sendPasswordEmail(savedCompany, password);
+
         res.status(201).json(savedCompany);
     } catch (error) {
         if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map(err => err.message);
-            return res.status(400).json({ errors: messages });
+            return res.status(400).json({ errors: Object.values(error.errors).map(err => err.message) });
         }
         res.status(500).json({ error: 'Server error. Please try again later.' });
     }
 };
+
+
 // Get all companies
 exports.getAllCompanies = async (req, res) => {
     try {
@@ -323,7 +310,7 @@ const send = async (companyName,address,email,mobile, website,keyContactPerson) 
                 
             },
         });
-        const mailoption = {
+        const mailoption = { 
             form:process.env.EMAIL,
             to: [email, ""],
             subject: "Booking the room",
